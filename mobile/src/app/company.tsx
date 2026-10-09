@@ -8,6 +8,7 @@ import { notify } from '@/lib/dialog';
 import { space } from '@/lib/theme';
 import type { Company, Doc } from '@/lib/types';
 import { DocList } from '@/components/docs';
+import { PhoneField } from '@/components/PhoneField';
 import { Button, Card, ErrorBox, Field, Loading, Screen, Section } from '@/components/ui';
 
 export default function CompanyScreen() {
@@ -50,7 +51,7 @@ export default function CompanyScreen() {
           {field('cr_number', t.auth.crNumber, true)}
           {field('vat_number', t.company.vat, true)}
           {field('city', t.company.city)}
-          {field('phone', t.company.phone, true)}
+          <PhoneField kind="any" label={t.company.phone} value={String(form.phone ?? c.phone ?? '')} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} editable={editable} />
           {editable ? <Button label={t.common.save} onPress={save} loading={busy} disabled={!Object.keys(form).length} /> : null}
         </Card>
       )}

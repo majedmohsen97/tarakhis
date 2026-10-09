@@ -6,6 +6,7 @@ import { useI18n } from '@/lib/i18n';
 import { westernDigits } from '@/lib/format';
 import { colors, space } from '@/lib/theme';
 import { Button, Card, Field, Screen, Txt } from '@/components/ui';
+import { PhoneField, isSaudiMobile } from '@/components/PhoneField';
 
 export default function Register() {
   const { t, lang, errorText } = useI18n();
@@ -45,14 +46,14 @@ export default function Register() {
         <Field label={t.auth.companyName} value={form.company_name} onChangeText={set('company_name')} />
         <Field label={`${t.auth.crNumber} (${t.common.optional})`} value={form.cr_number} onChangeText={set('cr_number')} keyboardType="number-pad" ltr />
         <Field label={t.auth.yourName} value={form.name} onChangeText={set('name')} autoComplete="name" />
-        <Field label={t.auth.phone} placeholder={t.auth.phoneHint} value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" ltr />
+        <PhoneField value={form.phone} onChange={set('phone')} />
         <Field label={t.auth.password} hint={t.auth.passwordHint} value={form.password} onChangeText={set('password')} secureTextEntry />
         {error ? <Txt color={colors.bad} style={{ marginBottom: space.sm }}>{error}</Txt> : null}
         <Button
           label={t.auth.createAccount}
           onPress={submit}
           loading={busy}
-          disabled={!form.company_name || !form.name || !form.phone || form.password.length < 8 || (needsCode && !form.invite_code)}
+          disabled={!form.company_name || !form.name || !isSaudiMobile(form.phone) || form.password.length < 8 || (needsCode && !form.invite_code)}
         />
       </Card>
     </Screen>

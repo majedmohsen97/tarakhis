@@ -13,6 +13,7 @@ import type { Doc, User, Vehicle } from '@/lib/types';
 import { DocList, MissingDocs } from '@/components/docs';
 import { pickedToUpload } from '@/components/FilePicker';
 import { PasswordCard } from '@/components/PasswordCard';
+import { PhoneField, localPhone } from '@/components/PhoneField';
 import { Avatar, Button, Card, ErrorBox, Field, Loading, Pill, Row, Screen, Section, Select, Txt } from '@/components/ui';
 
 type DriverData = { user: User; documents: Doc[]; missing: string[]; vehicle: Pick<Vehicle, 'id' | 'plate_number' | 'type'> | null };
@@ -82,7 +83,7 @@ export default function DriverDetail() {
             editing ? (
               <Card>
                 <Field label={t.auth.yourName} value={form.name ?? d.user.name} onChangeText={(v) => setForm((f) => ({ ...f, name: v }))} />
-                <Field label={t.auth.phone} value={form.phone ?? fmtPhone(d.user.phone)} onChangeText={(v) => setForm((f) => ({ ...f, phone: v }))} keyboardType="phone-pad" ltr />
+                <PhoneField value={form.phone ?? localPhone(d.user.phone)} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
                 <Select
                   label={t.fleet.idType}
                   value={(form.id_type ?? d.user.id_type) as string | null}

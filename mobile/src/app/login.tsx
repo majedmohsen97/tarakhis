@@ -7,6 +7,7 @@ import { westernDigits } from '@/lib/format';
 import { colors, space } from '@/lib/theme';
 import { Button, Card, Field, Icon, Row, Screen, Txt } from '@/components/ui';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { PhoneField, isSaudiMobile } from '@/components/PhoneField';
 
 export default function Login() {
   const { t, errorText } = useI18n();
@@ -50,10 +51,10 @@ export default function Login() {
         </Card>
       ) : null}
       <Card style={{ padding: space.lg }}>
-        <Field label={t.auth.phone} placeholder={t.auth.phoneHint} keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} ltr />
+        <PhoneField value={phone} onChange={setPhone} />
         <Field label={t.auth.password} secureTextEntry value={password} onChangeText={setPassword} onSubmitEditing={submit} autoComplete="password" />
         {error ? <Txt color={colors.bad} style={{ marginBottom: space.sm }}>{error}</Txt> : null}
-        <Button label={t.auth.login} onPress={submit} loading={busy} disabled={!phone || !password || !server} />
+        <Button label={t.auth.login} onPress={submit} loading={busy} disabled={!isSaudiMobile(phone) || !password || !server} />
       </Card>
       {Platform.OS !== 'web' && server ? (
         <Row justify="center" gap={space.sm}>

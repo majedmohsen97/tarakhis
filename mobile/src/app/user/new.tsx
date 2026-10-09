@@ -10,6 +10,7 @@ import { space } from '@/lib/theme';
 import type { Role, User, Vehicle } from '@/lib/types';
 import { Button, Card, Field, Screen, Select, Txt } from '@/components/ui';
 import { LoginDetails } from '@/components/PasswordCard';
+import { PhoneField, isSaudiMobile } from '@/components/PhoneField';
 
 export default function NewUser() {
   const params = useLocalSearchParams<{ role?: Role }>();
@@ -66,7 +67,7 @@ export default function NewUser() {
       <Card style={{ padding: space.lg }}>
         <Select label={t.fleet.role} value={role} options={roles.map((r) => ({ value: r, label: t.roles[r] }))} onChange={setRole} />
         <Field label={t.auth.yourName} value={form.name} onChangeText={set('name')} />
-        <Field label={t.auth.phone} placeholder={t.auth.phoneHint} value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" ltr />
+        <PhoneField value={form.phone} onChange={set('phone')} />
         <Field label={t.fleet.passwordOptional} hint={t.fleet.passwordOptionalHint} value={form.password} onChangeText={set('password')} autoCapitalize="none" ltr />
         {role === 'driver' ? (
           <>
@@ -88,7 +89,7 @@ export default function NewUser() {
             />
           </>
         ) : null}
-        <Button label={t.common.add} icon="person-add-outline" onPress={submit} loading={busy} disabled={!form.name || !form.phone || (form.password.length > 0 && form.password.length < 8)} />
+        <Button label={t.common.add} icon="person-add-outline" onPress={submit} loading={busy} disabled={!form.name || !isSaudiMobile(form.phone) || (form.password.length > 0 && form.password.length < 8)} />
       </Card>
     </Screen>
   );
