@@ -1,9 +1,7 @@
 import { View } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { api } from '@/lib/api';
 import { useApi } from '@/lib/hooks';
 import { useI18n } from '@/lib/i18n';
-import { confirm, notify } from '@/lib/dialog';
 import { fmtPhone } from '@/lib/format';
 import { radius } from '@/lib/theme';
 import type { User } from '@/lib/types';
@@ -11,20 +9,9 @@ import { Avatar, Button, ErrorBox, Header, ListRow, Loading, Pill, Screen } from
 
 /** Office and gate staff (drivers are managed under Fleet). */
 export default function Staff() {
-  const { t, errorText } = useI18n();
+  const { t } = useI18n();
   const users = useApi<User[]>('/users');
   const staff = (users.data ?? []).filter((u) => u.role !== 'driver');
-
-  async function manage(u: User) {
-    const ok = await confirm(u.name, `${t.roles[u.role]} · ${fmtPhone(u.phone)}\n\n${t.fleet.resetPassword}?`, t.fleet.resetPassword, t.common.cancel);
-    if (!ok) return;
-    try {
-      const r = await api<{ temp_password: string }>(`/users/${u.id}/reset-password`, { method: 'POST' });
-      notify(`${t.fleet.tempPassword}: ${r.temp_password}`, t.fleet.tempPasswordHint);
-    } catch (e) {
-      notify(errorText(e));
-    }
-  }
 
   return (
     <Screen edges={['bottom']} refreshing={users.refreshing} onRefresh={users.reload}>
@@ -40,7 +27,7 @@ export default function Staff() {
             title={u.name}
             subtitle={fmtPhone(u.phone)}
             right={<Pill label={u.active ? t.roles[u.role] : t.fleet.inactive} tone={u.active ? 'info' : 'bad'} />}
-            onPress={() => manage(u)}
+            onPress={() => router.push(`/staff/${u.id}`)}
           />
         ))}
       </View>

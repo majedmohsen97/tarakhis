@@ -6,12 +6,13 @@ import { api } from '@/lib/api';
 import { useApi } from '@/lib/hooks';
 import { useI18n } from '@/lib/i18n';
 import { useAuth, isManager } from '@/lib/auth';
-import { confirm, notify } from '@/lib/dialog';
+import { notify } from '@/lib/dialog';
 import { fmtPhone } from '@/lib/format';
 import { colors, space } from '@/lib/theme';
 import type { Doc, User, Vehicle } from '@/lib/types';
 import { DocList, MissingDocs } from '@/components/docs';
 import { pickedToUpload } from '@/components/FilePicker';
+import { PasswordCard } from '@/components/PasswordCard';
 import { Avatar, Button, Card, ErrorBox, Field, Loading, Pill, Row, Screen, Section, Select, Txt } from '@/components/ui';
 
 type DriverData = { user: User; documents: Doc[]; missing: string[]; vehicle: Pick<Vehicle, 'id' | 'plate_number' | 'type'> | null };
@@ -25,6 +26,7 @@ export default function DriverDetail() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Partial<User>>({});
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const d = res.data;
 
   async function save(patch: Record<string, unknown>) {
@@ -37,16 +39,6 @@ export default function DriverDetail() {
       notify(errorText(e));
     } finally {
       setBusy(false);
-    }
-  }
-
-  async function resetPassword() {
-    if (!(await confirm(t.fleet.resetPassword, d?.user.name ?? '', t.common.confirm, t.common.cancel))) return;
-    try {
-      const r = await api<{ temp_password: string }>(`/users/${id}/reset-password`, { method: 'POST' });
-      notify(`${t.fleet.tempPassword}: ${r.temp_password}`, t.fleet.tempPasswordHint);
-    } catch (e) {
-      notify(errorText(e));
     }
   }
 
@@ -113,7 +105,7 @@ export default function DriverDetail() {
             ) : (
               <Row gap={space.sm} wrap>
                 <Button small variant="secondary" icon="create-outline" label={t.common.edit} onPress={() => setEditing(true)} />
-                <Button small variant="secondary" icon="key-outline" label={t.fleet.resetPassword} onPress={resetPassword} />
+                <Button small variant="secondary" icon="key-outline" label={t.fleet.passwordTitle} onPress={() => setShowPassword((v) => !v)} />
                 <Button
                   small
                   variant={d.user.active ? 'danger' : 'secondary'}
@@ -123,6 +115,12 @@ export default function DriverDetail() {
                 />
               </Row>
             )
+          ) : null}
+
+          {isManager(me) && showPassword ? (
+            <Section title={t.fleet.passwordTitle}>
+              <PasswordCard userId={d.user.id} name={d.user.name} phone={d.user.phone} />
+            </Section>
           ) : null}
 
           <Section

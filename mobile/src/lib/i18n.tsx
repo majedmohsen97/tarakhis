@@ -64,6 +64,12 @@ const ar = {
     plate: 'رقم اللوحة', type: 'نوع الشاحنة', capacity: 'الحمولة (طن)', idType: 'نوع الهوية', idNumber: 'رقم الهوية / الإقامة', nationality: 'الجنسية', license: 'رقم الرخصة',
     truck: 'الشاحنة المخصصة', noTruck: 'بدون شاحنة', inactive: 'موقوف', role: 'الدور', tempPassword: 'كلمة المرور المؤقتة', tempPasswordHint: 'شاركها مع الموظف — لن تظهر مرة أخرى',
     resetPassword: 'إعادة تعيين كلمة المرور', deactivate: 'إيقاف الحساب', activate: 'تفعيل الحساب', siteName: 'اسم الموقع', lat: 'خط العرض', lng: 'خط الطول', radius: 'نطاق الوصول (متر)',
+    passwordOptional: 'كلمة المرور (اختياري)', passwordOptionalHint: 'اتركها فارغة لإنشاء كلمة مؤقتة تلقائياً — 8 أحرف على الأقل',
+    passwordTitle: 'كلمة المرور', setPassword: 'حفظ', generateTemp: 'كلمة مؤقتة', passwordSaved: 'تم حفظ كلمة المرور الجديدة ✔',
+    passwordHelp: 'اكتب كلمة مرور جديدة وأرسلها للموظف، أو أنشئ كلمة مؤقتة.', shareLogin: 'مشاركة بيانات الدخول', copied: 'تم النسخ ✔',
+    loginMessage: (name: string, phone: string, password: string, link: string) =>
+      `تراخيص — بيانات دخول ${name}\nالرابط: ${link}\nرقم الجوال: ${phone}\nكلمة المرور: ${password}`,
+    staffMember: 'الموظف',
     useMyLocation: 'استخدام موقعي الحالي', radiusHint: 'عند دخول الشاحنة هذا النطاق يُسجَّل وصولها تلقائياً', issues: (n: number) => `${n} مستند يحتاج إجراء`, setPhoto: 'تغيير الصورة', driverOf: 'السائق',
   },
   gate: {
@@ -191,6 +197,12 @@ const en: Dict = {
     plate: 'Plate number', type: 'Truck type', capacity: 'Capacity (tons)', idType: 'ID type', idNumber: 'ID / Iqama number', nationality: 'Nationality', license: 'Licence number',
     truck: 'Assigned truck', noTruck: 'No truck', inactive: 'Disabled', role: 'Role', tempPassword: 'Temporary password', tempPasswordHint: 'Share it with the user — it will not be shown again',
     resetPassword: 'Reset password', deactivate: 'Disable account', activate: 'Enable account', siteName: 'Site name', lat: 'Latitude', lng: 'Longitude', radius: 'Arrival radius (m)',
+    passwordOptional: 'Password (optional)', passwordOptionalHint: 'Leave empty to create a temporary one — at least 8 characters',
+    passwordTitle: 'Password', setPassword: 'Save password', generateTemp: 'Create temporary password', passwordSaved: 'New password saved ✔',
+    passwordHelp: 'Type a new password and send it to the employee, or create a temporary one.', shareLogin: 'Share login details', copied: 'Copied ✔',
+    loginMessage: (name: string, phone: string, password: string, link: string) =>
+      `Tarakhis — login for ${name}\nLink: ${link}\nMobile: ${phone}\nPassword: ${password}`,
+    staffMember: 'Staff member',
     useMyLocation: 'Use my current location', radiusHint: 'When a truck enters this radius, its arrival is recorded automatically', issues: (n: number) => `${n} document(s) need action`, setPhoto: 'Change photo', driverOf: 'Driver',
   },
   gate: {

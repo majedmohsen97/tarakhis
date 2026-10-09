@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, Share } from 'react-native';
 
 // React Native's Alert is a no-op on web, so fall back to the browser dialogs there.
 
@@ -20,4 +20,23 @@ export function confirm(title: string, message: string, okLabel: string, cancelL
       { text: okLabel, style: destructive ? 'destructive' : 'default', onPress: () => resolve(true) },
     ]);
   });
+}
+
+/** Opens the share sheet (WhatsApp, SMS…) on phones; on web uses Web Share or copies to the clipboard. */
+export async function shareText(text: string): Promise<'shared' | 'copied' | 'failed'> {
+  try {
+    if (Platform.OS === 'web') {
+      const nav = globalThis.navigator as Navigator | undefined;
+      if (nav?.share) {
+        await nav.share({ text });
+        return 'shared';
+      }
+      await nav?.clipboard?.writeText(text);
+      return 'copied';
+    }
+    await Share.share({ message: text });
+    return 'shared';
+  } catch {
+    return 'failed';
+  }
 }

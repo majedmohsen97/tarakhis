@@ -145,12 +145,14 @@ export default function userRoutes(db) {
     res.json({ user: serializeUser(q.get(db, 'SELECT * FROM users WHERE id = ?', u.id)) });
   });
 
+  // Sets a password chosen by the manager, or generates a temporary one when none is given.
   r.post('/:id/reset-password', requireRole(MANAGERS), (req, res) => {
     const u = findUser(req, Number(req.params.id));
     if (u.role === 'owner' && req.user.role !== 'owner') throw forbidden();
-    const temp = randomPassword();
-    q.run(db, 'UPDATE users SET password_hash = ? WHERE id = ?', bcrypt.hashSync(temp, 10), u.id);
-    res.json({ temp_password: temp });
+    const chosen = req.body?.password ? str(req.body.password, 'password', { min: 8, max: 100 }) : null;
+    const password = chosen || randomPassword();
+    q.run(db, 'UPDATE users SET password_hash = ? WHERE id = ?', bcrypt.hashSync(password, 10), u.id);
+    res.json({ temp_password: chosen ? null : password });
   });
 
   // Driver photo shown to gate staff. Drivers may set their own; office staff may set anyone's.

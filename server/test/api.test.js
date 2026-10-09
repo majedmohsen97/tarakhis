@@ -316,6 +316,20 @@ test('database backup produces a readable copy', async () => {
   copy.close();
 });
 
+test('managers can set a chosen password or generate a temporary one', async () => {
+  const g = (await call('GET', '/api/users?role=gate', { token: s.owner })).data[0];
+  const tooShort = await call('POST', `/api/users/${g.id}/reset-password`, { token: s.owner, body: { password: 'short' } });
+  assert.equal(tooShort.status, 400);
+  const chosen = await call('POST', `/api/users/${g.id}/reset-password`, { token: s.owner, body: { password: 'NewGuardPass9' } });
+  assert.equal(chosen.data.temp_password, null);
+  const login = await call('POST', '/api/auth/login', { body: { phone: '0500000003', password: 'NewGuardPass9' } });
+  assert.equal(login.status, 200);
+  const temp = await call('POST', `/api/users/${g.id}/reset-password`, { token: s.owner, body: {} });
+  assert.ok(temp.data.temp_password.length >= 10);
+  // Non-managers cannot reset passwords.
+  assert.equal((await call('POST', `/api/users/${g.id}/reset-password`, { token: s.gate, body: {} })).status, 403);
+});
+
 test('roles are enforced', async () => {
   assert.equal((await call('POST', '/api/vehicles', { token: s.driver, body: { plate_number: 'X' } })).status, 403);
   assert.equal((await call('POST', '/api/gate/scan', { token: s.driver, body: { code: '000000' } })).status, 403);
