@@ -13,6 +13,7 @@ export default function More() {
     { title: t.more.companyDocs, icon: 'business-outline', href: '/company', show: true },
     { title: t.more.invoices, icon: 'receipt-outline', href: '/invoices', show: isManager(user) },
     { title: t.more.gateLog, icon: 'scan-outline', href: '/gate-log', show: true },
+    { title: t.more.connect, icon: 'qr-code-outline', href: '/connect', show: true },
     { title: t.more.staff, icon: 'people-circle-outline', href: '/staff', show: isManager(user) },
     { title: t.tabs.profile, icon: 'person-circle-outline', href: '/account', show: true },
   ];

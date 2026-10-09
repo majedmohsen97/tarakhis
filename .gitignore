@@ -19,3 +19,8 @@ mobile/android/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# pilot run on this computer
+server/pilot-data/
+current-link.txt
+pilot.pids

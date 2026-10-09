@@ -56,9 +56,22 @@ cd mobile && npx expo lint
 - **Invoices** — generated from completed, not-yet-invoiced trips in a week (per trip or per ton), editable while draft, numbered `INV-YYYY-0001` on approval, printable bilingual HTML (print → PDF). Money is stored in halalas.
 - **Multi-company** — every query is scoped to the signed-in user's company; tests cover cross-company access.
 
-## Deploy for a pilot
+## Free pilot: run it on your own computer
 
-One container serves the API, the web app (installable on phones via "Add to Home Screen") and the public gate-pass page.
+No hosting bill and no account needed. The server runs on a Windows PC and gets a public HTTPS link from Cloudflare.
+
+1. Install once: Node.js 22.13+ and `winget install --id Cloudflare.cloudflared -e`.
+2. Double-click **`start-pilot.cmd`**. The first run asks for the pilot invite code, then prints the link, copies it, and opens it.
+3. Phones: open the link in the browser, **or** in the Android app tap *Change* (server) → *Scan connect code* and scan the QR from **More → Connect mobile app**.
+
+- Keep the PC awake while the pilot is running; press Enter in the window to stop.
+- The link changes each time you start it (the app's server setting handles this, so no rebuild is needed).
+- Pilot data and settings live in `server/pilot-data/` (git-ignored); daily backups are in `server/pilot-data/backups/`. Copy that folder somewhere safe regularly.
+- `start-pilot.cmd -Demo` runs the demo company instead; `start-pilot.cmd -Background` + `stop-pilot.cmd` run it without keeping a window open.
+
+## Paid / always-on hosting (Docker, e.g. Render)
+
+`render.yaml` deploys this repository on Render (needs the paid Starter instance for the persistent disk). One container serves the API, the web app (installable on phones via "Add to Home Screen") and the public gate-pass page.
 
 ```bash
 docker build -t tarakhis .
@@ -78,9 +91,9 @@ docker run -d -p 4000:4000 -v tarakhis-data:/data \
 
 Background location (keeps sharing while the app is closed) needs the installed app, not the web version.
 
-1. Put your server URL in `mobile/eas.json` (`EXPO_PUBLIC_API_URL`, both profiles).
-2. `cd mobile && npx eas-cli@latest login` (free Expo account).
-3. `npx eas-cli@latest build -p android --profile preview` → EAS prints a link to download the APK; send it to drivers.
+1. `cd mobile && npx eas-cli@latest login` (free Expo account).
+2. `npx eas-cli@latest build -p android --profile preview` → EAS prints a link to download the APK; send it to drivers.
+3. On first launch the app asks for the server: scan the QR from **More → Connect mobile app**. (For a fixed server you can instead bake it in with `EXPO_PUBLIC_API_URL` in `eas.json`.)
 
 iPhone: needs an Apple Developer account for TestFlight. Until then iPhone users can use the web link (no background location on the web).
 

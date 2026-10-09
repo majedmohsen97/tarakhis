@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, setAuthToken, setUnauthorizedHandler } from './api';
+import { api, apiUrl, loadServerUrl, saveServerUrl, setAuthToken, setUnauthorizedHandler } from './api';
 import { stopBackgroundTracking } from './backgroundLocation';
 import { storage } from './storage';
 import type { Company, User } from './types';
@@ -12,6 +12,10 @@ type AuthValue = {
   register: (data: Record<string, string>) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  /** Current server address ('' until one is set in a release build). */
+  server: string;
+  /** Switches to another server; signs out because accounts belong to one server. */
+  changeServer: (url: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -21,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
+  const [server, setServer] = useState('');
 
   const clear = useCallback(async () => {
     await stopBackgroundTracking();
@@ -41,8 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clear();
     });
     (async () => {
+      await loadServerUrl();
+      setServer(apiUrl());
       const token = await storage.get(TOKEN_KEY);
-      if (token) {
+      if (token && apiUrl()) {
         setAuthToken(token);
         try {
           await refresh();
@@ -74,8 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout: clear,
       login: async (phone, password) => start(await api('/auth/login', { method: 'POST', body: { phone, password } })),
       register: async (data) => start(await api('/auth/register', { method: 'POST', body: data })),
+      server,
+      changeServer: async (url) => {
+        await clear();
+        await saveServerUrl(url);
+        setServer(apiUrl());
+      },
     }),
-    [ready, user, company, refresh, clear, start],
+    [ready, user, company, refresh, clear, start, server],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

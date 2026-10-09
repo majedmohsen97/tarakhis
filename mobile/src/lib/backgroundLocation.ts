@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { API_URL } from './api';
+import { apiUrl, loadServerUrl } from './api';
 import { storage } from './storage';
 
 // Shares the truck's location during an active trip even when the app is in the background or
@@ -44,7 +44,9 @@ if (Platform.OS !== 'web') {
     }));
     const points = [...(await readPending()), ...fresh];
     try {
-      const res = await fetch(`${API_URL}/api/trips/${tripId}/location`, {
+      // The app may have been launched in the background, so load the saved server first.
+      await loadServerUrl();
+      const res = await fetch(`${apiUrl()}/api/trips/${tripId}/location`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ points }),

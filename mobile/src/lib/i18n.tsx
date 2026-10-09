@@ -103,7 +103,19 @@ const ar = {
     status: { draft: 'مسودة', approved: 'معتمدة', paid: 'مدفوعة' } as Record<string, string>, empty: 'لا توجد فواتير بعد', units: { trip: 'رحلة', ton: 'طن', item: 'بند' } as Record<string, string>,
     deleteDraft: 'حذف المسودة', zatcaNote: 'ملاحظة: الربط مع منصة فاتورة (ZATCA) غير مفعّل بعد',
   },
-  more: { title: 'المزيد', invoices: 'الفواتير', documents: 'مراجعة المستندات', companyDocs: 'مستندات الشركة', gateLog: 'سجل البوابة', staff: 'الموظفون والصلاحيات', company: 'بيانات الشركة', language: 'اللغة', settings: 'الإعدادات' },
+  server: {
+    title: 'عنوان الخادم', current: 'الخادم', change: 'تغيير', none: 'اربط التطبيق بخادم شركتك أولاً',
+    noneHint: 'اطلب من المشرف فتح «المزيد ← ربط تطبيق الجوال» ثم امسح الرمز، أو الصق الرابط هنا.',
+    url: 'رابط الخادم', placeholder: 'https://....trycloudflare.com', scan: 'مسح رمز الربط', save: 'تحقق واحفظ',
+    invalid: 'الرابط غير صحيح', unreachable: 'لا يمكن الوصول إلى الخادم — تأكد أن الكمبيوتر يعمل وأن الرابط صحيح',
+    saved: 'تم الربط بالخادم ✔', signOutNote: 'تغيير الخادم يسجّل خروجك من الحساب الحالي',
+  },
+  connect: {
+    title: 'ربط تطبيق الجوال', hint: 'على جوال السائق أو الحارس: افتح تطبيق تراخيص ← «تغيير الخادم» ← «مسح رمز الربط» ثم امسح هذا الرمز.',
+    linkHint: 'أو أرسل هذا الرابط لهم (يعمل أيضاً من متصفح الجوال مباشرة):', changes: 'إذا أُعيد تشغيل الكمبيوتر يتغير الرابط — اعرض هذا الرمز من جديد.',
+    share: 'مشاركة الرابط',
+  },
+  more: { title: 'المزيد', connect: 'ربط تطبيق الجوال', invoices: 'الفواتير', documents: 'مراجعة المستندات', companyDocs: 'مستندات الشركة', gateLog: 'سجل البوابة', staff: 'الموظفون والصلاحيات', company: 'بيانات الشركة', language: 'اللغة', settings: 'الإعدادات' },
   company: { vat: 'الرقم الضريبي', city: 'المدينة', phone: 'هاتف الشركة' },
   errors: {
     NETWORK: 'تعذر الاتصال بالخادم. تحقق من الإنترنت.', BAD_CREDENTIALS: 'رقم الجوال أو كلمة المرور غير صحيحة', INVALID_PHONE: 'أدخل رقم جوال سعودي مثل 05XXXXXXXX',
@@ -113,7 +125,7 @@ const ar = {
     MISSING_WEIGHTS: 'بعض الرحلات بدون وزن — أكمل الأوزان أو استخدم التسعير لكل رحلة', ALREADY_SCHEDULED: 'السائق مجدول في هذه الوردية مسبقاً', FILE_TOO_LARGE: 'الملف كبير جداً (الحد 10 ميجابايت)',
     UNSUPPORTED_FILE: 'نوع الملف غير مدعوم — صورة أو PDF', FILE_OR_EXPIRY_REQUIRED: 'أرفق ملفاً أو أدخل تاريخ الانتهاء', PLATE_TAKEN: 'رقم اللوحة مسجل مسبقاً', INVOICE_LOCKED: 'الفاتورة معتمدة ولا يمكن تعديلها',
     CANNOT_CHANGE_SELF: 'لا يمكنك تغيير دورك أو إيقاف حسابك', LOCATION_CONSENT_REQUIRED: 'وافق على مشاركة الموقع أولاً من شاشة الرحلة',
-    INVITE_CODE_INVALID: 'رمز الدعوة غير صحيح', DEFAULT: 'حدث خطأ، حاول مرة أخرى',
+    INVITE_CODE_INVALID: 'رمز الدعوة غير صحيح', NO_SERVER: 'اربط التطبيق بخادم شركتك أولاً', DEFAULT: 'حدث خطأ، حاول مرة أخرى',
   } as Record<string, string>,
 };
 
@@ -218,7 +230,19 @@ const en: Dict = {
     status: { draft: 'Draft', approved: 'Approved', paid: 'Paid' }, empty: 'No invoices yet', units: { trip: 'trip', ton: 'ton', item: 'item' },
     deleteDraft: 'Delete draft', zatcaNote: 'Note: ZATCA (Fatoora) e-invoicing integration is not enabled yet',
   },
-  more: { title: 'More', invoices: 'Invoices', documents: 'Review documents', companyDocs: 'Company documents', gateLog: 'Gate log', staff: 'Staff & roles', company: 'Company details', language: 'Language', settings: 'Settings' },
+  server: {
+    title: 'Server address', current: 'Server', change: 'Change', none: 'Connect the app to your company server first',
+    noneHint: 'Ask your supervisor to open "More → Connect mobile app" and scan the code, or paste the link here.',
+    url: 'Server link', placeholder: 'https://....trycloudflare.com', scan: 'Scan connect code', save: 'Check & save',
+    invalid: 'Invalid link', unreachable: 'Cannot reach the server — make sure the computer is on and the link is right',
+    saved: 'Connected to the server ✔', signOutNote: 'Changing the server signs you out of the current account',
+  },
+  connect: {
+    title: 'Connect mobile app', hint: 'On the driver or guard phone: open Tarakhis → "Change" server → "Scan connect code", then scan this code.',
+    linkHint: 'Or send them this link (it also works directly in the phone browser):', changes: 'If the computer restarts, the link changes — show this code again.',
+    share: 'Share link',
+  },
+  more: { title: 'More', connect: 'Connect mobile app', invoices: 'Invoices', documents: 'Review documents', companyDocs: 'Company documents', gateLog: 'Gate log', staff: 'Staff & roles', company: 'Company details', language: 'Language', settings: 'Settings' },
   company: { vat: 'VAT number', city: 'City', phone: 'Company phone' },
   errors: {
     NETWORK: 'Could not reach the server. Check your connection.', BAD_CREDENTIALS: 'Wrong mobile number or password', INVALID_PHONE: 'Enter a Saudi mobile like 05XXXXXXXX',
@@ -228,7 +252,7 @@ const en: Dict = {
     MISSING_WEIGHTS: 'Some trips have no weight — add weights or price per trip', ALREADY_SCHEDULED: 'Driver already scheduled for that shift', FILE_TOO_LARGE: 'File too large (max 10 MB)',
     UNSUPPORTED_FILE: 'Unsupported file — use a photo or PDF', FILE_OR_EXPIRY_REQUIRED: 'Attach a file or enter the expiry date', PLATE_TAKEN: 'Plate number already exists', INVOICE_LOCKED: 'Approved invoices cannot be edited',
     CANNOT_CHANGE_SELF: 'You cannot change your own role or disable yourself', LOCATION_CONSENT_REQUIRED: 'Agree to location sharing first (Trip screen)',
-    INVITE_CODE_INVALID: 'Invalid invite code', DEFAULT: 'Something went wrong, please try again',
+    INVITE_CODE_INVALID: 'Invalid invite code', NO_SERVER: 'Connect the app to your company server first', DEFAULT: 'Something went wrong, please try again',
   },
 };
 

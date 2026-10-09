@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { Platform, View, StyleSheet, Pressable } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
@@ -10,7 +10,8 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 
 export default function Login() {
   const { t, errorText } = useI18n();
-  const { login } = useAuth();
+  const { login, server } = useAuth();
+  const host = server ? server.replace(/^https?:\/\//, '') : '';
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,12 +42,25 @@ export default function Login() {
         <Txt variant="title" center style={{ fontSize: 30, lineHeight: 40 }}>{t.appName}</Txt>
         <Txt variant="muted" center>{t.tagline}</Txt>
       </View>
+      {!server ? (
+        <Card tone="warn" style={{ padding: space.lg, gap: space.sm }}>
+          <Txt weight="700" color={colors.warn}>{t.server.none}</Txt>
+          <Txt variant="small">{t.server.noneHint}</Txt>
+          <Button label={t.server.title} icon="link-outline" onPress={() => router.push('/server')} />
+        </Card>
+      ) : null}
       <Card style={{ padding: space.lg }}>
         <Field label={t.auth.phone} placeholder={t.auth.phoneHint} keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} ltr />
         <Field label={t.auth.password} secureTextEntry value={password} onChangeText={setPassword} onSubmitEditing={submit} autoComplete="password" />
         {error ? <Txt color={colors.bad} style={{ marginBottom: space.sm }}>{error}</Txt> : null}
-        <Button label={t.auth.login} onPress={submit} loading={busy} disabled={!phone || !password} />
+        <Button label={t.auth.login} onPress={submit} loading={busy} disabled={!phone || !password || !server} />
       </Card>
+      {Platform.OS !== 'web' && server ? (
+        <Row justify="center" gap={space.sm}>
+          <Txt variant="small" numberOfLines={1} style={{ flexShrink: 1 }}>{`${t.server.current}: ${host}`}</Txt>
+          <Button small variant="ghost" label={t.server.change} onPress={() => router.push('/server')} />
+        </Row>
+      ) : null}
       <Link href="/register" asChild>
         <Pressable style={{ padding: space.md }}>
           <Txt center color={colors.primary} weight="600">{t.auth.noAccount}</Txt>

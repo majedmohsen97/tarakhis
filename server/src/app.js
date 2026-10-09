@@ -46,7 +46,9 @@ export function createApp(db) {
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true, name: 'tarakhis', time: new Date().toISOString() }));
-  app.get('/api/config', (_req, res) => res.json({ registration_requires_code: Boolean(config.registrationCode) }));
+  app.get('/api/config', (_req, res) =>
+    res.json({ registration_requires_code: Boolean(config.registrationCode), public_url: config.publicUrl || null }),
+  );
 
   // Public routes: pass verification page and signed file links.
   app.use(publicVerifyRoutes(db));

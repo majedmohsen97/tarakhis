@@ -6,12 +6,10 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://REPLACE-WITH-YOUR-SERVER" }
+      "android": { "buildType": "apk" }
     },
     "production": {
-      "autoIncrement": true,
-      "env": { "EXPO_PUBLIC_API_URL": "https://REPLACE-WITH-YOUR-SERVER" }
+      "autoIncrement": true
     }
   },
   "submit": {

@@ -1,25 +1,67 @@
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { storage } from './storage';
 
 /**
- * API base URL:
- * 1. EXPO_PUBLIC_API_URL if set (production / staging)
- * 2. web served by the Tarakhis server: same origin as the page
- * 3. web on the Expo dev server (port 8081): same host, port 4000
- * 4. phone in development: the dev machine's LAN IP (from the Expo dev server), port 4000
+ * API base URL, in order of priority:
+ * 1. A server address saved on the device (login screen → server, typed or scanned from a QR code)
+ * 2. EXPO_PUBLIC_API_URL baked into the build
+ * 3. web served by the Tarakhis server: same origin as the page
+ * 4. web on the Expo dev server (port 8081): same host, port 4000
+ * 5. phone in development: the dev machine's LAN IP (from the Expo dev server), port 4000
+ * Release builds without 1 or 2 have no server yet and ask for one on the login screen.
  */
-function resolveBaseUrl(): string {
+function defaultBaseUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
-  if (fromEnv) return fromEnv.replace(/\/$/, '');
+  if (fromEnv && !fromEnv.includes('REPLACE')) return fromEnv.replace(/\/$/, '');
   if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname) {
     if (window.location.port !== '8081') return window.location.origin;
     return `${window.location.protocol}//${window.location.hostname}:4000`;
   }
   const host = Constants.expoConfig?.hostUri?.split(':')[0];
-  return `http://${host || 'localhost'}:4000`;
+  return host ? `http://${host}:4000` : '';
 }
 
-export const API_URL = resolveBaseUrl();
+const SERVER_KEY = 'tarakhis.serverUrl';
+const DEFAULT_URL = defaultBaseUrl();
+let savedUrl: string | null = null;
+
+/** Current server, e.g. https://abc.trycloudflare.com ('' when none is configured yet). */
+export const apiUrl = () => savedUrl || DEFAULT_URL;
+
+/** Accepts "abc.trycloudflare.com", "https://abc.trycloudflare.com/" or any link on that server. */
+export function normalizeServerUrl(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    if (!/^https?:$/.test(url.protocol) || !url.hostname.includes('.')) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+export async function loadServerUrl() {
+  savedUrl = normalizeServerUrl((await storage.get(SERVER_KEY)) ?? '');
+}
+
+export async function saveServerUrl(url: string | null) {
+  savedUrl = url;
+  if (url) await storage.set(SERVER_KEY, url);
+  else await storage.remove(SERVER_KEY);
+}
+
+/** True when `url` answers like a Tarakhis server. */
+export async function pingServer(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${url}/api/health`);
+    const data = await res.json();
+    return res.ok && data?.name === 'tarakhis';
+  } catch {
+    return false;
+  }
+}
 
 export class ApiError extends Error {
   status: number;
@@ -47,7 +89,7 @@ export function setUnauthorizedHandler(fn: (() => void) | null) {
 /** Turns a server-relative path (e.g. a signed file URL) into an absolute URL. */
 export function absoluteUrl(path?: string | null): string | null {
   if (!path) return null;
-  return path.startsWith('http') ? path : `${API_URL}${path}`;
+  return path.startsWith('http') ? path : `${apiUrl()}${path}`;
 }
 
 export type UploadFile = { uri: string; name: string; type: string; file?: File | Blob };
@@ -59,6 +101,8 @@ type Options = {
 };
 
 export async function api<T = any>(path: string, { method = 'GET', body, form }: Options = {}): Promise<T> {
+  const base = apiUrl();
+  if (!base) throw new ApiError(0, 'NO_SERVER', 'No server configured');
   const headers: Record<string, string> = {};
   const sentToken = authToken;
   if (sentToken) headers.Authorization = `Bearer ${sentToken}`;
@@ -83,7 +127,7 @@ export async function api<T = any>(path: string, { method = 'GET', body, form }:
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}/api${path}`, { method, headers, body: payload });
+    res = await fetch(`${base}/api${path}`, { method, headers, body: payload });
   } catch {
     throw new ApiError(0, 'NETWORK', 'Network error');
   }

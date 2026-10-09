@@ -6,7 +6,7 @@ import { I18nProvider, useI18n } from '@/lib/i18n';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { colors } from '@/lib/theme';
 
-const PUBLIC_ROUTES = ['login', 'register'];
+const PUBLIC_ROUTES = ['login', 'register', 'server'];
 
 function RootStack() {
   const { t } = useI18n();
@@ -32,6 +32,7 @@ function RootStack() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="register" options={{ title: t.auth.register }} />
+      <Stack.Screen name="server" options={{ title: t.server.title }} />
       <Stack.Screen name="(office)" options={{ headerShown: false }} />
       <Stack.Screen name="(gate)" options={{ headerShown: false }} />
       <Stack.Screen name="(driver)" options={{ headerShown: false }} />
