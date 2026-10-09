@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# server runtime data: database, uploads, signing keys, backups, secrets
+server/data/
+server/.env
+.env
+.env*.local
+
+# Expo / build output
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/expo-env.d.ts
+mobile/ios/
+mobile/android/
+
+# misc
+*.log
+.DS_Store
+*.tsbuildinfo

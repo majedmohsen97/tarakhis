@@ -1,0 +1,85 @@
+{
+  "expo": {
+    "name": "Tarakhis تراخيص",
+    "slug": "tarakhis",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "tarakhis",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "icon": "./assets/images/icon.png",
+      "bundleIdentifier": "sa.tarakhis.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F6B4A",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "sa.tarakhis.app"
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "name": "Tarakhis تراخيص",
+      "shortName": "تراخيص",
+      "themeColor": "#0F6B4A",
+      "backgroundColor": "#F4F6F5",
+      "lang": "ar"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F6B4A",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-localization",
+        {
+          "supportsRTL": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "تحتاج تراخيص إلى الكاميرا لمسح رمز تصريح الدخول وتصوير المستندات / Tarakhis uses the camera to scan gate passes and photograph documents",
+          "barcodeScannerEnabled": true,
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "تستخدم تراخيص موقعك أثناء الرحلة لتأكيد الوصول إلى المردم / Tarakhis uses your location during a trip to confirm arrival at the landfill",
+          "locationAlwaysAndWhenInUsePermission": "تستمر تراخيص بمشاركة موقع الشاحنة أثناء الرحلة فقط حتى لو أُغلق التطبيق / Tarakhis keeps sharing the truck location only while a trip is active, even if the app is closed",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "تحتاج تراخيص إلى الصور لرفع المستندات / Tarakhis needs photo access to upload documents"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false,
+      "reactCompiler": true
+    }
+  }
+}

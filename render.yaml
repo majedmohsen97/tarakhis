@@ -1,0 +1,25 @@
+# Render Blueprint: New → Blueprint → pick this repository → fill REGISTRATION_CODE → Apply.
+# The default paid instance is required: free instances have no persistent disk, so the database
+# and uploaded documents would be lost on every restart.
+services:
+  - type: web
+    name: tarakhis
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: frankfurt # closest Render region to Saudi Arabia
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    disk:
+      name: tarakhis-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /data
+      - key: JWT_SECRET
+        generateValue: true
+      # Invite code the pilot company types when registering (Render asks for it on first deploy).
+      - key: REGISTRATION_CODE
+        sync: false
