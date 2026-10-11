@@ -78,3 +78,39 @@ export const isIsoDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number
 
 /** Converts Arabic-Indic digits typed on Arabic keyboards to Western digits. */
 export const westernDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+
+const hijriParts = (() => {
+  try {
+    const f = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+    // Check the runtime really supports the Umm al-Qura calendar (some engines silently ignore it).
+    if (f.resolvedOptions().calendar !== 'islamic-umalqura') return null;
+    return (d: Date) => {
+      const parts = Object.fromEntries(f.formatToParts(d).map((p) => [p.type, p.value]));
+      return { y: Number(parts.year), m: Number(parts.month), d: Number(parts.day) };
+    };
+  } catch {
+    return null;
+  }
+})();
+
+export const hijriSupported = () => hijriParts !== null;
+
+/** Hijri (Umm al-Qura) 'YYYY-MM-DD' → Gregorian 'YYYY-MM-DD', or null if invalid/unsupported. */
+export function hijriToGregorian(hijri: string): string | null {
+  if (!hijriParts) return null;
+  const m = westernDigits(hijri).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (mo < 1 || mo > 12 || d < 1 || d > 30) return null;
+  // Estimate from the mean Hijri year/month length, then search nearby days for an exact match.
+  const epoch = Date.UTC(622, 6, 19);
+  const guess = epoch + ((y - 1) * 354.36707 + (mo - 1) * 29.530589 + (d - 1)) * 86400000;
+  for (let off = 0; off <= 40; off++) {
+    for (const sign of [1, -1]) {
+      const date = new Date(guess + sign * off * 86400000);
+      const p = hijriParts(date);
+      if (p.y === y && p.m === mo && p.d === d) return date.toISOString().slice(0, 10);
+    }
+  }
+  return null;
+}

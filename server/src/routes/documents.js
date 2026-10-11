@@ -4,6 +4,8 @@ import { OFFICE, requireRole, signPath, verifySignedPath } from '../auth.js';
 import { DOC_TYPES, withState } from '../compliance.js';
 import { config } from '../config.js';
 import { uploader, resolveUpload, removeUpload } from '../uploads.js';
+import { notifyPendingDocument, sendPush } from '../notify.js';
+import { runReminders } from './notifications.js';
 import { HttpError, str, oneOf, date, num, notFound, forbidden, todayLocal, addDays, nowIso } from '../util.js';
 
 export function serializeDoc(d) {
@@ -44,7 +46,7 @@ export default function documentRoutes(db) {
     const cid = req.user.company_id;
     const exists =
       ownerType === 'driver'
-        ? q.get(db, "SELECT 1 FROM users WHERE id = ? AND company_id = ? AND role = 'driver'", ownerId, cid)
+        ? q.get(db, 'SELECT 1 FROM users WHERE id = ? AND company_id = ?', ownerId, cid)
         : ownerType === 'vehicle'
           ? q.get(db, 'SELECT 1 FROM vehicles WHERE id = ? AND company_id = ?', ownerId, cid)
           : ownerId === cid;
@@ -56,11 +58,10 @@ export default function documentRoutes(db) {
     const cid = req.user.company_id;
     const where = ['d.company_id = ?'];
     const params = [cid];
-    if (req.user.role === 'driver') {
+    if (!OFFICE.includes(req.user.role)) {
+      // Drivers and gate staff see their own documents (and their assigned truck's).
       where.push("((d.owner_type = 'driver' AND d.owner_id = ?) OR (d.owner_type = 'vehicle' AND d.owner_id = ?))");
       params.push(req.user.id, req.user.default_vehicle_id ?? -1);
-    } else if (!OFFICE.includes(req.user.role)) {
-      throw forbidden();
     }
     const ownerType = oneOf(req.query.owner_type, 'owner_type', ['driver', 'vehicle', 'company']);
     if (ownerType) { where.push('d.owner_type = ?'); params.push(ownerType); }
@@ -93,7 +94,7 @@ export default function documentRoutes(db) {
       if (!isOffice) {
         // Drivers can only upload for themselves or their assigned truck.
         const own = (ownerType === 'driver' && ownerId === req.user.id) || (ownerType === 'vehicle' && ownerId === req.user.default_vehicle_id);
-        if (req.user.role !== 'driver' || !own) throw forbidden();
+        if (!own) throw forbidden();
       }
       assertOwner(req, ownerType, ownerId);
       const docType = oneOf(req.body.doc_type, 'doc_type', DOC_TYPES[ownerType], { required: true });
@@ -113,6 +114,10 @@ export default function documentRoutes(db) {
         status, str(req.body.notes, 'notes', { max: 500 }), req.user.id, isOffice ? req.user.id : null, isOffice ? nowIso() : null,
       );
       const doc = q.get(db, `SELECT d.*, ${OWNER_NAME_SQL} AS owner_name FROM documents d WHERE d.id = ?`, info.lastInsertRowid);
+      // Office is told about uploads waiting for review; a document that is already close to
+      // expiry gets its reminder right away instead of at the next hourly check.
+      if (status === 'pending') sendPush(notifyPendingDocument(db, doc)).catch(() => {});
+      else runReminders(db);
       res.status(201).json(serializeDoc(withState(doc)));
     } catch (err) {
       if (req.file) removeUpload(req.file.filename);
@@ -138,6 +143,7 @@ export default function documentRoutes(db) {
       d.id,
     );
     const doc = q.get(db, `SELECT d.*, ${OWNER_NAME_SQL} AS owner_name FROM documents d WHERE d.id = ?`, d.id);
+    runReminders(db);
     res.json(serializeDoc(withState(doc)));
   });
 

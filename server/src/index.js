@@ -6,6 +6,7 @@ import { openDb, backupDb } from './db.js';
 import { createApp } from './app.js';
 import { hasWebApp } from './web.js';
 import { todayLocal } from './util.js';
+import { runReminders } from './routes/notifications.js';
 
 const db = openDb(config.dbFile);
 const app = createApp(db);
@@ -27,6 +28,11 @@ function dailyBackup() {
 }
 dailyBackup();
 setInterval(dailyBackup, 60 * 60 * 1000).unref();
+
+// Document expiry reminders (30/14/7/1/0 days and expired), checked at start and every hour.
+const reminders = runReminders(db);
+if (reminders) console.log(`Created ${reminders} expiry reminder(s)`);
+setInterval(() => runReminders(db), 60 * 60 * 1000).unref();
 
 const server = app.listen(config.port, '0.0.0.0', () => {
   const lan = Object.values(os.networkInterfaces())

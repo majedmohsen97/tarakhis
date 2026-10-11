@@ -107,10 +107,11 @@ export default function userRoutes(db) {
     if (!OFFICE.includes(req.user.role) && req.user.id !== id) throw forbidden();
     const u = findUser(req, id);
     const body = { user: serializeUser(u) };
+    // Every employee can have personal documents (iqama, licence…); "missing" applies to drivers.
+    const c = ownerCompliance(db, req.user.company_id, 'driver', u.id);
+    body.documents = c.docs.map(serializeDoc);
+    body.missing = u.role === 'driver' ? c.missing : [];
     if (u.role === 'driver') {
-      const c = ownerCompliance(db, req.user.company_id, 'driver', u.id);
-      body.documents = c.docs.map(serializeDoc);
-      body.missing = c.missing;
       body.vehicle = u.default_vehicle_id ? q.get(db, 'SELECT id, plate_number, type FROM vehicles WHERE id = ?', u.default_vehicle_id) : null;
     }
     res.json(body);

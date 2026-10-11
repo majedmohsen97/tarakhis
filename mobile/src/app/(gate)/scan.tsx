@@ -8,6 +8,7 @@ import { westernDigits } from '@/lib/format';
 import { colors, radius, space } from '@/lib/theme';
 import type { GateResult, Site } from '@/lib/types';
 import { GateResultView } from '@/components/GateResultView';
+import { NotificationBell } from '@/components/NotificationBell';
 import { Button, Card, ErrorBox, Field, Header, Screen, Segmented, Select, Txt } from '@/components/ui';
 
 export default function Scan() {
@@ -58,7 +59,7 @@ export default function Scan() {
   const cameraReady = permission?.granted;
   return (
     <Screen>
-      <Header title={t.gate.scanTitle} />
+      <Header title={t.gate.scanTitle} right={<NotificationBell />} />
       {sites.data && sites.data.length > 1 ? (
         <Select label={t.gate.site} value={activeSite} options={sites.data.map((s) => ({ value: s.id, label: s.name }))} onChange={setSiteId} />
       ) : null}

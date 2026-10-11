@@ -176,6 +176,25 @@ CREATE TABLE IF NOT EXISTS invoices (
   UNIQUE (company_id, number)
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY,
+  company_id INTEGER NOT NULL REFERENCES companies(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  kind TEXT NOT NULL,
+  document_id INTEGER REFERENCES documents(id) ON DELETE CASCADE,
+  milestone TEXT,
+  doc_type TEXT,
+  owner_type TEXT,
+  owner_id INTEGER,
+  owner_name TEXT,
+  expiry_date TEXT,
+  days_left INTEGER,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  read_at TEXT,
+  UNIQUE (user_id, document_id, kind, milestone)
+);
+CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, read_at, created_at);
+
 CREATE TABLE IF NOT EXISTS invoice_lines (
   id INTEGER PRIMARY KEY,
   invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
@@ -206,6 +225,7 @@ export function openDb(file) {
 // Columns added after the first release. Each entry is applied once if the column is missing.
 const COLUMN_MIGRATIONS = [
   ['users', 'location_consent_at', 'TEXT'],
+  ['users', 'push_token', 'TEXT'],
 ];
 
 function migrate(db) {

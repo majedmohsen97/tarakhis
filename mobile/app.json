@@ -75,6 +75,13 @@
         {
           "photosPermission": "تحتاج تراخيص إلى الصور لرفع المستندات / Tarakhis needs photo access to upload documents"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#0F6B4A"
+        }
       ]
     ],
     "experiments": {

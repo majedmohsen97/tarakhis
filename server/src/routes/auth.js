@@ -74,6 +74,16 @@ export default function authRoutes(db) {
     res.json({ user: serializeUser(q.get(db, 'SELECT * FROM users WHERE id = ?', req.user.id)) });
   });
 
+  // Registers this phone for push notifications (Expo push token from the Android/iOS app).
+  r.post('/me/push-token', authenticate(db), (req, res) => {
+    const token = req.body?.token ? str(req.body.token, 'token', { max: 200 }) : null;
+    if (token && !/^Expo(nent)?PushToken\[.+\]$/.test(token)) throw badRequest('VALIDATION', 'Invalid push token');
+    // A device belongs to one account at a time.
+    if (token) q.run(db, 'UPDATE users SET push_token = NULL WHERE push_token = ? AND id != ?', token, req.user.id);
+    q.run(db, 'UPDATE users SET push_token = ? WHERE id = ?', token, req.user.id);
+    res.json({ ok: true });
+  });
+
   r.post('/me/password', authenticate(db), (req, res) => {
     const user = q.get(db, 'SELECT * FROM users WHERE id = ?', req.user.id);
     if (!bcrypt.compareSync(String(req.body.current_password || ''), user.password_hash)) {

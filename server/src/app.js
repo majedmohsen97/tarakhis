@@ -16,6 +16,7 @@ import tripRoutes, { tripTicketRoute } from './routes/trips.js';
 import scheduleRoutes from './routes/schedule.js';
 import invoiceRoutes, { invoiceHtmlRoute } from './routes/invoices.js';
 import dashboardRoutes from './routes/dashboard.js';
+import notificationRoutes from './routes/notifications.js';
 
 export function createApp(db) {
   const app = express();
@@ -70,6 +71,7 @@ export function createApp(db) {
   api.use('/trips', tripRoutes(db));
   api.use('/schedule', scheduleRoutes(db));
   api.use('/invoices', invoiceRoutes(db));
+  api.use('/notifications', notificationRoutes(db));
   api.use('/', dashboardRoutes(db));
   app.use('/api', api);
 

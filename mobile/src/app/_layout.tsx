@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { NotificationsProvider } from '@/lib/notifications';
 import { colors } from '@/lib/theme';
 
 const PUBLIC_ROUTES = ['login', 'register', 'server'];
@@ -33,6 +34,7 @@ function RootStack() {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="register" options={{ title: t.auth.register }} />
       <Stack.Screen name="server" options={{ title: t.server.title }} />
+      <Stack.Screen name="notifications" options={{ title: t.notif.title }} />
       <Stack.Screen name="(office)" options={{ headerShown: false }} />
       <Stack.Screen name="(gate)" options={{ headerShown: false }} />
       <Stack.Screen name="(driver)" options={{ headerShown: false }} />
@@ -45,8 +47,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <I18nProvider>
         <AuthProvider>
-          <StatusBar style="dark" />
-          <RootStack />
+          <NotificationsProvider>
+            <StatusBar style="dark" />
+            <RootStack />
+          </NotificationsProvider>
         </AuthProvider>
       </I18nProvider>
     </SafeAreaProvider>

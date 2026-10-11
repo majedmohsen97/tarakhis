@@ -34,13 +34,13 @@ const ar = {
   } as Record<string, string>,
   requirements: { identity: 'الهوية / الإقامة', driving_license: 'رخصة القيادة', vehicle_registration: 'استمارة المركبة', insurance: 'التأمين', landfill_permit: 'تصريح دخول المردم' } as Record<string, string>,
   docStates: { valid: 'ساري', expiring: 'ينتهي قريباً', expired: 'منتهي', pending: 'قيد المراجعة', rejected: 'مرفوض', missing: 'غير موجود' } as Record<string, string>,
-  owners: { driver: 'سائق', vehicle: 'شاحنة', company: 'الشركة' } as Record<string, string>,
+  owners: { driver: 'الموظف', vehicle: 'شاحنة', company: 'الشركة' } as Record<string, string>,
   docs: {
     title: 'المستندات', upload: 'رفع مستند', uploadFor: 'رفع مستند لـ', type: 'نوع المستند', number: 'رقم المستند', issueDate: 'تاريخ الإصدار',
     expiryDate: 'تاريخ الانتهاء', dateHint: 'YYYY-MM-DD', file: 'الملف', takePhoto: 'تصوير', chooseFile: 'اختيار ملف / صورة', noFile: 'لم يتم اختيار ملف',
     approve: 'اعتماد', reject: 'رفض', review: 'مراجعة', attention: 'تحتاج إجراء', reviewQueue: 'بانتظار المراجعة', companyDocs: 'مستندات الشركة',
     viewFile: 'عرض الملف', site: 'المردم / الموقع', anySite: 'كل المواقع', uploadedPending: 'تم الرفع — بانتظار مراجعة قسم السلامة', notes: 'ملاحظات',
-    missingTitle: 'مستندات ناقصة', hijri: 'هجري',
+    missingTitle: 'مستندات ناقصة', hijri: 'هجري', gregorian: 'ميلادي', hijriHint: 'اكتب التاريخ الهجري كما هو مطبوع: YYYY-MM-DD (مثال 1449-05-14)', equals: 'يوافق',
   },
   alerts: { title: 'تنبيهات', expired: 'منتهي', expiring: 'ينتهي قريباً', pending: 'بانتظار المراجعة', missing: 'ناقص', rejected: 'مرفوض', allGood: 'كل المستندات سارية 👍' } as Record<string, string>,
   dash: {
@@ -121,6 +121,17 @@ const ar = {
     linkHint: 'أو أرسل هذا الرابط لهم (يعمل أيضاً من متصفح الجوال مباشرة):', changes: 'إذا أُعيد تشغيل الكمبيوتر يتغير الرابط — اعرض هذا الرمز من جديد.',
     share: 'مشاركة الرابط',
   },
+  notif: {
+    title: 'التنبيهات', empty: 'لا توجد تنبيهات', markAll: 'تحديد الكل كمقروء', enable: 'تفعيل التنبيهات على هذا الجهاز',
+    enabled: 'التنبيهات مفعّلة على هذا الجهاز ✔', denied: 'التنبيهات مرفوضة — فعّلها من إعدادات الجوال/المتصفح',
+    enableHint: 'نذكّرك قبل انتهاء أي مستند بـ 30 و14 و7 أيام ويوم واحد، ويوم الانتهاء.',
+    pending: 'مستند جديد بانتظار المراجعة', expired: (doc: string) => `انتهت صلاحية ${doc}`,
+    expiresIn: (doc: string, d: number) => `${doc}: ${d === 0 ? 'ينتهي اليوم' : d === 1 ? 'ينتهي غداً' : d === 2 ? 'ينتهي خلال يومين' : d <= 10 ? `ينتهي خلال ${d} أيام` : `ينتهي خلال ${d} يوماً`}`,
+  },
+  personDocs: {
+    title: 'مستندات الموظف', hint: 'أضف الإقامة أو الهوية والرخصة الآن، وسنذكّرك قبل انتهائها.', saved: 'تم الحفظ ✔', saveDoc: 'حفظ المستند',
+    addOther: 'إضافة مستند آخر', done: 'تم', photo: 'صورة المستند (اختياري)', skip: 'لاحقاً',
+  },
   more: { title: 'المزيد', connect: 'ربط تطبيق الجوال', invoices: 'الفواتير', documents: 'مراجعة المستندات', companyDocs: 'مستندات الشركة', gateLog: 'سجل البوابة', staff: 'الموظفون والصلاحيات', company: 'بيانات الشركة', language: 'اللغة', settings: 'الإعدادات' },
   company: { vat: 'الرقم الضريبي', city: 'المدينة', phone: 'هاتف الشركة' },
   errors: {
@@ -167,13 +178,13 @@ const en: Dict = {
   },
   requirements: { identity: 'National ID / Iqama', driving_license: 'Driving licence', vehicle_registration: 'Vehicle registration', insurance: 'Insurance', landfill_permit: 'Landfill permit' },
   docStates: { valid: 'Valid', expiring: 'Expiring soon', expired: 'Expired', pending: 'Under review', rejected: 'Rejected', missing: 'Missing' },
-  owners: { driver: 'Driver', vehicle: 'Truck', company: 'Company' },
+  owners: { driver: 'Employee', vehicle: 'Truck', company: 'Company' },
   docs: {
     title: 'Documents', upload: 'Upload document', uploadFor: 'Upload for', type: 'Document type', number: 'Document number', issueDate: 'Issue date',
     expiryDate: 'Expiry date', dateHint: 'YYYY-MM-DD', file: 'File', takePhoto: 'Take photo', chooseFile: 'Choose file / photo', noFile: 'No file selected',
     approve: 'Approve', reject: 'Reject', review: 'Review', attention: 'Needs action', reviewQueue: 'Awaiting review', companyDocs: 'Company documents',
     viewFile: 'View file', site: 'Landfill / site', anySite: 'All sites', uploadedPending: 'Uploaded — waiting for safety review', notes: 'Notes',
-    missingTitle: 'Missing documents', hijri: 'Hijri',
+    missingTitle: 'Missing documents', hijri: 'Hijri', gregorian: 'Gregorian', hijriHint: 'Type the Hijri date as printed: YYYY-MM-DD (e.g. 1449-05-14)', equals: 'equals',
   },
   alerts: { title: 'Alerts', expired: 'Expired', expiring: 'Expiring', pending: 'Pending review', missing: 'Missing', rejected: 'Rejected', allGood: 'All documents are valid 👍' },
   dash: {
@@ -253,6 +264,17 @@ const en: Dict = {
     title: 'Connect mobile app', hint: 'On the driver or guard phone: open Tarakhis → "Change" server → "Scan connect code", then scan this code.',
     linkHint: 'Or send them this link (it also works directly in the phone browser):', changes: 'If the computer restarts, the link changes — show this code again.',
     share: 'Share link',
+  },
+  notif: {
+    title: 'Notifications', empty: 'No notifications', markAll: 'Mark all as read', enable: 'Enable notifications on this device',
+    enabled: 'Notifications are on for this device ✔', denied: 'Notifications are blocked — allow them in the phone/browser settings',
+    enableHint: 'We remind you 30, 14, 7 and 1 day before any document expires, and on the day itself.',
+    pending: 'New document awaiting review', expired: (doc: string) => `${doc} has expired`,
+    expiresIn: (doc: string, d: number) => `${doc} ${d === 0 ? 'expires today' : d === 1 ? 'expires tomorrow' : `expires in ${d} days`}`,
+  },
+  personDocs: {
+    title: 'Employee documents', hint: 'Add the iqama / ID and licence now — we will remind you before they expire.', saved: 'Saved ✔', saveDoc: 'Save document',
+    addOther: 'Add another document', done: 'Done', photo: 'Document photo (optional)', skip: 'Later',
   },
   more: { title: 'More', connect: 'Connect mobile app', invoices: 'Invoices', documents: 'Review documents', companyDocs: 'Company documents', gateLog: 'Gate log', staff: 'Staff & roles', company: 'Company details', language: 'Language', settings: 'Settings' },
   company: { vat: 'VAT number', city: 'City', phone: 'Company phone' },

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { api, apiUrl, loadServerUrl, saveServerUrl, setAuthToken, setUnauthorizedHandler } from './api';
 import { stopBackgroundTracking } from './backgroundLocation';
+import { unregisterPushToken } from './push';
 import { storage } from './storage';
 import type { Company, User } from './types';
 
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(async () => {
     await stopBackgroundTracking();
+    await unregisterPushToken();
     setAuthToken(null);
     setUser(null);
     setCompany(null);

@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { useState } from 'react';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { api } from '@/lib/api';
@@ -10,6 +11,7 @@ import { space } from '@/lib/theme';
 import type { Role, User, Vehicle } from '@/lib/types';
 import { Button, Card, Field, Screen, Select, Txt } from '@/components/ui';
 import { LoginDetails } from '@/components/PasswordCard';
+import { PersonDocsForm } from '@/components/PersonDocsForm';
 import { PhoneField, isSaudiMobile } from '@/components/PhoneField';
 
 export default function NewUser() {
@@ -52,9 +54,18 @@ export default function NewUser() {
           <Txt>{t.roles[created.user.role]}</Txt>
         </Card>
         <LoginDetails name={created.user.name} phone={created.user.phone} password={created.temp_password} />
+        <View style={{ marginTop: space.lg }}>
+          <PersonDocsForm
+            userId={created.user.id}
+            role={created.user.role}
+            idType={created.user.id_type}
+            idNumber={created.user.id_number}
+            licenseNumber={created.user.license_number}
+          />
+        </View>
         <Button
-          label={t.common.close}
-          onPress={() => (created.user.role === 'driver' ? router.replace(`/driver/${created.user.id}`) : router.back())}
+          label={t.personDocs.done}
+          onPress={() => router.replace(created.user.role === 'driver' ? `/driver/${created.user.id}` : `/staff/${created.user.id}`)}
           style={{ marginTop: space.md }}
         />
       </Screen>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { api } from '@/lib/api';
 import { useApi } from '@/lib/hooks';
 import { useI18n } from '@/lib/i18n';
@@ -8,7 +8,8 @@ import { useAuth } from '@/lib/auth';
 import { confirm, notify } from '@/lib/dialog';
 import { fmtPhone } from '@/lib/format';
 import { space } from '@/lib/theme';
-import type { Role, User } from '@/lib/types';
+import type { Doc, Role, User } from '@/lib/types';
+import { DocList } from '@/components/docs';
 import { PasswordCard } from '@/components/PasswordCard';
 import { Avatar, Button, Card, ErrorBox, Loading, Pill, Row, Screen, Section, Select, Txt } from '@/components/ui';
 
@@ -17,7 +18,7 @@ export default function StaffMember() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, errorText } = useI18n();
   const { user: me } = useAuth();
-  const res = useApi<{ user: User }>(`/users/${id}`);
+  const res = useApi<{ user: User; documents: Doc[] }>(`/users/${id}`);
   const [busy, setBusy] = useState(false);
   const u = res.data?.user;
   const isSelf = me?.id === u?.id;
@@ -62,6 +63,12 @@ export default function StaffMember() {
               <Button small variant="secondary" icon="logo-whatsapp" label="WhatsApp" onPress={() => Linking.openURL(`https://wa.me/${u.phone.replace('+', '')}`)} />
             </Row>
           </Card>
+
+          <Section
+            title={t.docs.title}
+            action={<Button small icon="cloud-upload-outline" label={t.docs.upload} onPress={() => router.push({ pathname: '/document/new', params: { owner_type: 'driver', owner_id: String(u.id) } })} />}>
+            <DocList docs={res.data?.documents ?? []} />
+          </Section>
 
           {canManage && !isSelf ? (
             <>

@@ -9,6 +9,7 @@ import { storage } from '@/lib/storage';
 import { colors, radius, space } from '@/lib/theme';
 import type { Pass } from '@/lib/types';
 import { GateResultView } from '@/components/GateResultView';
+import { NotificationBell } from '@/components/NotificationBell';
 import { Button, Card, ErrorBox, Header, Loading, Row, Screen, Txt } from '@/components/ui';
 
 const CACHE_KEY = 'tarakhis.lastPass';
@@ -68,7 +69,7 @@ export default function PassScreen() {
 
   return (
     <Screen onRefresh={load}>
-      <Header title={t.pass.title} subtitle={company?.name} />
+      <Header title={t.pass.title} subtitle={company?.name} right={<NotificationBell />} />
       {error ? <ErrorBox error={error} onRetry={load} /> : null}
       {!pass ? (
         !error ? <Loading /> : null

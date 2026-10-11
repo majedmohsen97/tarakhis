@@ -49,3 +49,6 @@ png(path.join(pwa, 'icon-192.png'), background(true) + mark({ scale: 0.78 }), 19
 png(path.join(pwa, 'icon-512.png'), background(true) + mark({ scale: 0.78 }), 512);
 png(path.join(pwa, 'maskable-512.png'), background(false) + mark({ scale: 0.6 }), 512);
 png(path.join(pwa, 'apple-touch-icon.png'), background(false) + mark({ scale: 0.75 }), 180);
+
+// Android notification icon: white silhouette on transparent (Android tints it).
+png(path.join(images, 'notification-icon.png'), mark({ scale: 0.9, check: 'transparent' }), 96);

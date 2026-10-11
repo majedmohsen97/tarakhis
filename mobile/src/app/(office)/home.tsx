@@ -9,6 +9,7 @@ import type { Alert } from '@/lib/types';
 import { AlertList } from '@/components/docs';
 import { Button, ErrorBox, Header, Loading, Row, Screen, Section, Stat } from '@/components/ui';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { NotificationBell } from '@/components/NotificationBell';
 
 type Dashboard = {
   today: string;
@@ -29,7 +30,7 @@ export default function Home() {
 
   return (
     <Screen refreshing={dash.refreshing} onRefresh={() => { dash.reload(); alerts.reload(); }}>
-      <Header title={company?.name ?? t.appName} subtitle={d ? `${t.common.today} · ${fmtDate(d.today, lang)}` : undefined} right={<LanguageToggle />} />
+      <Header title={company?.name ?? t.appName} subtitle={d ? `${t.common.today} · ${fmtDate(d.today, lang)}` : undefined} right={<Row gap={8}><NotificationBell /><LanguageToggle /></Row>} />
       {dash.error ? <ErrorBox error={dash.error} onRetry={dash.reload} /> : null}
       {!d ? (
         <Loading />

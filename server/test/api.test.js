@@ -330,6 +330,63 @@ test('managers can set a chosen password or generate a temporary one', async () 
   assert.equal((await call('POST', `/api/users/${g.id}/reset-password`, { token: s.gate, body: {} })).status, 403);
 });
 
+test('expiry reminders: milestones, no repeats, recipients, pending uploads', async () => {
+  const { generateExpiryNotifications, sendPush } = await import('../src/notify.js');
+  const { openDb: open } = await import('../src/db.js');
+  const db = open(':memory:');
+  db.exec("INSERT INTO companies (id, name) VALUES (1, 'Co')");
+  const add = (id, role, extra = '') => db.exec(`INSERT INTO users (id, company_id, name, phone, password_hash, role${extra ? ', push_token' : ''}) VALUES (${id}, 1, 'U${id}', '+96650000010${id}', 'x', '${role}'${extra ? `, '${extra}'` : ''})`);
+  add(1, 'owner', 'ExponentPushToken[abc]');
+  add(2, 'safety');
+  add(3, 'driver');
+  add(4, 'gate');
+  const doc = (owner, type, expiry) =>
+    Number(db.prepare("INSERT INTO documents (company_id, owner_type, owner_id, doc_type, expiry_date, status) VALUES (1, 'driver', ?, ?, ?, 'approved')").run(owner, type, expiry).lastInsertRowid);
+  const today = '2026-10-10';
+  doc(3, 'iqama', '2026-10-17'); // 7 days → d7
+  doc(3, 'driving_license', '2027-06-01'); // far away → nothing
+  doc(4, 'iqama', '2026-10-05'); // expired gate guard iqama
+  const oldLicence = doc(4, 'driving_license', '2026-10-12');
+  doc(4, 'driving_license', '2028-01-01'); // renewed → old one is ignored
+
+  const first = generateExpiryNotifications(db, today);
+  const rows = db.prepare('SELECT user_id, doc_type, milestone, owner_id FROM notifications ORDER BY user_id, doc_type').all();
+  // iqama of driver 3 → owner, safety and the driver; expired iqama of guard 4 → owner, safety, guard.
+  assert.equal(first.length, 6);
+  assert.ok(rows.some((r) => r.user_id === 3 && r.doc_type === 'iqama' && r.milestone === 'd7'));
+  assert.ok(rows.some((r) => r.user_id === 4 && r.milestone === 'expired'));
+  assert.ok(!rows.some((r) => r.user_id === 4 && r.owner_id === 3), 'guard does not get the driver’s reminders');
+  assert.ok(!db.prepare('SELECT 1 FROM notifications WHERE document_id = ?').get(oldLicence), 'renewed documents stay quiet');
+  assert.equal(generateExpiryNotifications(db, today).length, 0, 'running again repeats nothing');
+  assert.equal(generateExpiryNotifications(db, '2026-10-16').length, 3, 'next milestone (1 day) notifies again');
+
+  const sent = [];
+  const count = await sendPush(first, async (_url, init) => sent.push(JSON.parse(init.body)));
+  assert.equal(count, 2, 'only the owner has a phone registered (2 reminders)');
+  assert.match(sent[0][0].title, /الإقامة/);
+
+  // API: a driver upload notifies the office; users read their own notifications.
+  const before = (await call('GET', '/api/notifications', { token: s.owner })).data.unread;
+  const up = await call('POST', '/api/documents', { token: s.driver, form: { owner_type: 'driver', owner_id: String(s.driverId), doc_type: 'health_certificate', expiry_date: inDays(200) } });
+  assert.equal(up.status, 201);
+  const list = (await call('GET', '/api/notifications', { token: s.owner })).data;
+  assert.equal(list.unread, before + 1);
+  assert.equal(list.items[0].kind, 'doc_pending');
+  await call('POST', '/api/notifications/read', { token: s.owner, body: {} });
+  assert.equal((await call('GET', '/api/notifications/unread-count', { token: s.owner })).data.unread, 0);
+
+  assert.equal((await call('POST', '/api/auth/me/push-token', { token: s.driver, body: { token: 'not-a-token' } })).status, 400);
+  assert.equal((await call('POST', '/api/auth/me/push-token', { token: s.driver, body: { token: 'ExponentPushToken[xyz]' } })).status, 200);
+});
+
+test('any employee can hold personal documents (iqama for a gate guard)', async () => {
+  const g = (await call('GET', '/api/users?role=gate', { token: s.owner })).data[0];
+  const res = await call('POST', '/api/documents', { token: s.owner, form: { owner_type: 'driver', owner_id: String(g.id), doc_type: 'iqama', number: '2111111111', expiry_date: inDays(100) } });
+  assert.equal(res.status, 201);
+  const detail = await call('GET', `/api/users/${g.id}`, { token: s.owner });
+  assert.ok(detail.data.documents.some((d) => d.doc_type === 'iqama'));
+});
+
 test('roles are enforced', async () => {
   assert.equal((await call('POST', '/api/vehicles', { token: s.driver, body: { plate_number: 'X' } })).status, 403);
   assert.equal((await call('POST', '/api/gate/scan', { token: s.driver, body: { code: '000000' } })).status, 403);
