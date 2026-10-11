@@ -60,7 +60,7 @@ if (-not (Test-Path (Join-Path $mobile 'dist\index.html'))) {
 # --- public HTTPS link -----------------------------------------------------------------------------
 Say 'Opening the Cloudflare link...'
 if (Test-Path $tunnelLog) { Remove-Item $tunnelLog -Force }
-$tunnel = Start-Process -FilePath 'cloudflared' -ArgumentList @('tunnel', '--no-autoupdate', '--url', 'http://127.0.0.1:4000') `
+$tunnel = Start-Process -FilePath 'cloudflared' -ArgumentList @('tunnel', '--no-autoupdate', '--protocol', 'http2', '--url', 'http://127.0.0.1:4000') `
   -RedirectStandardError $tunnelLog -WindowStyle Hidden -PassThru
 $url = $null
 for ($i = 0; $i -lt 60 -and -not $url; $i++) {
@@ -92,6 +92,15 @@ if (-not $ok) {
   Read-Host 'Press Enter to close'; exit 1
 }
 @($api.Id, $tunnel.Id) | Set-Content -Path (Join-Path $root 'pilot.pids') -Encoding ascii
+
+# The link exists before Cloudflare finishes connecting (opening it early shows error 1033),
+# so wait until it really answers.
+Say 'Waiting for the link to become reachable...'
+$reachable = $false
+for ($i = 0; $i -lt 90 -and -not $reachable; $i++) {
+  try { $reachable = (Invoke-RestMethod "$url/api/health" -TimeoutSec 5).ok } catch { Start-Sleep -Seconds 2 }
+}
+if (-not $reachable) { Say 'The link is not reachable yet. Wait a minute and refresh the page (error 1033 means: still connecting).' Yellow }
 
 Set-Content -Path (Join-Path $root 'current-link.txt') -Value $url -Encoding ascii
 try { Set-Clipboard -Value $url } catch { }
